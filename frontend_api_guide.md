@@ -4,6 +4,41 @@
 
 ---
 
+## ✅ Verified API Status
+
+All endpoints below were tested and confirmed working on **2026-03-31**.
+
+| # | Operation | Type | Auth Required | Status |
+|---|-----------|------|--------------|--------|
+| 1 | `requestOtp` | Mutation | ❌ No | ✅ Pass |
+| 2 | `verifyOtp` | Mutation | ❌ No | ✅ Pass |
+| 3 | `login` | Mutation | ❌ No | ✅ Pass |
+| 4 | `login` (wrong email) | Mutation | ❌ No | ✅ Returns error |
+| 5 | `login` (wrong password) | Mutation | ❌ No | ✅ Returns error |
+| 6 | `register` | Mutation | ❌ No | ✅ Pass (201) |
+| 7 | `forgotPassword` | Mutation | ❌ No | ✅ Pass |
+| 8 | `refreshTokens` | Mutation | ❌ No | ✅ Pass |
+| 9 | `myProfile` | Query | ✅ Yes | ✅ Pass |
+| 10 | `myProfile` (no token) | Query | ✅ Yes | ✅ Returns Unauthorized |
+| 11 | `updateProfile` | Mutation | ✅ Yes | ✅ Pass |
+| 12 | `myAddresses` (paginated) | Query | ✅ Yes | ✅ Pass |
+| 13 | `createAddress` | Mutation | ✅ Yes | ✅ Pass (201, stateful) |
+| 14 | `setDefaultAddress` | Mutation | ✅ Yes | ✅ Pass |
+| 15 | `deleteAddress` | Mutation | ✅ Yes | ✅ Pass |
+| 16 | `marketOnboardingChecklist` | Query | ✅ Yes | ✅ Pass |
+| 17 | `activateMarket` | Mutation | ✅ Yes | ✅ Pass |
+| 18 | `updateMarketMembershipStatus` | Mutation | ✅ Yes | ✅ Pass |
+| 19 | `myConsents` | Query | ✅ Yes | ✅ Pass |
+| 20 | `grantConsents` | Mutation | ✅ Yes | ✅ Pass (stateful) |
+| 21 | `withdrawConsent` | Mutation | ✅ Yes | ✅ Pass (stateful) |
+| 22 | `requestDataExport` | Mutation | ✅ Yes | ✅ Pass |
+| 23 | `POST /api/v1/files/avatar` | REST | ✅ Yes | ✅ Pass |
+| 24 | REST upload (wrong MIME type) | REST | ✅ Yes | ✅ Returns HTTP 400 |
+| 25 | REST upload (no token) | REST | ❌ No | ✅ Returns HTTP 401 |
+| 26 | `mock-token-john` profile | Query | ✅ Yes | ✅ Returns John Smith (za) |
+
+---
+
 ## Table of Contents
 1. [Core Concepts](#-core-concepts)
 2. [Client Setup](#-client-setup)
