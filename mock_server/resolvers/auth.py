@@ -5,8 +5,8 @@ import strawberry
 from mock_server.types import (
     OtpRequestInput, OtpRequestResponse, OtpResponsePayloadDto,
     VerifyOtpInput, LoginResponse, LoginPayloadDto, AuthTokensDto,
-    LoginInput, RegisterInput, AuthnUserResponse, ForgotPasswordInput, EmptyResponse,
-    ResponseMetaDto, authn_user_from_dict,
+    LoginInput, RegisterInput, AuthnUserResponse, ForgotPasswordInput,
+    RefreshTokensInput, EmptyResponse, ResponseMetaDto, authn_user_from_dict,
 )
 from mock_server.store import store
 from mock_server.seed import MOCK_ACCESS_TOKEN, MOCK_REFRESH_TOKEN
