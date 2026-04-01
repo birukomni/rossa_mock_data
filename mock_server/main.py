@@ -10,6 +10,10 @@ from strawberry.fastapi import GraphQLRouter
 
 from mock_server.schema import schema
 from mock_server.rest.upload import router as upload_router
+from mock_server.rest.restaurants import router as restaurants_router
+from mock_server.rest.catalog import router as catalog_router
+from mock_server.rest.menu import router as menu_router
+from mock_server.rest.orders import router as orders_router
 
 
 async def get_context(request: Request) -> dict:
@@ -43,6 +47,10 @@ app.include_router(graphql_app, prefix="/graphql")
 
 # ── REST ──────────────────────────────────────────────────────────────────────
 app.include_router(upload_router)
+app.include_router(restaurants_router)
+app.include_router(catalog_router)
+app.include_router(menu_router)
+app.include_router(orders_router)
 
 
 # ── Health ────────────────────────────────────────────────────────────────────

@@ -13,6 +13,10 @@ from mock_server.seed import (
     SEED_MARKETS,
     SEED_CHECKLISTS,
     SEED_CONSENTS,
+    SEED_RESTAURANTS,
+    SEED_CATALOG_CATEGORIES,
+    SEED_MENU_ITEMS,
+    SEED_ORDERS,
 )
 
 
@@ -28,6 +32,10 @@ class MockStore:
         self.checklists: dict[str, dict] = copy.deepcopy(SEED_CHECKLISTS)
         self.consents: list[dict] = copy.deepcopy(SEED_CONSENTS)
         self.deleted_users: set[str] = set()
+        self.restaurants: list[dict] = copy.deepcopy(SEED_RESTAURANTS)
+        self.categories: list[dict] = copy.deepcopy(SEED_CATALOG_CATEGORIES)
+        self.menu_items: list[dict] = copy.deepcopy(SEED_MENU_ITEMS)
+        self.orders: list[dict] = copy.deepcopy(SEED_ORDERS)
 
     # ── User helpers ─────────────────────────────────────────────────────────
     def get_user(self, user_id: str) -> dict | None:
@@ -149,6 +157,144 @@ class MockStore:
                 return c
         return None
 
+    # ── Restaurant helpers ────────────────────────────────────────────────────
+
+    def get_restaurants(
+        self, city: str | None = None, is_open: bool | None = None, search: str | None = None
+    ) -> list[dict]:
+        results = self.restaurants
+        if city is not None:
+            results = [r for r in results if r["city"].lower() == city.lower()]
+        if is_open is not None:
+            results = [r for r in results if r["is_open"] == is_open]
+        if search:
+            q = search.lower()
+            results = [
+                r for r in results
+                if q in r["name"].lower() or q in r["address"].lower() or q in r["city"].lower()
+            ]
+        return results
+
+    def get_top_restaurants(self, limit: int = 10) -> list[dict]:
+        return sorted(self.restaurants, key=lambda r: r["rating"], reverse=True)[:limit]
+
+    def get_restaurant(self, restaurant_id: str) -> dict | None:
+        return next((r for r in self.restaurants if r["id"] == restaurant_id), None)
+
+    def add_restaurant(self, r: dict) -> dict:
+        self.restaurants.append(r)
+        return r
+
+    def update_restaurant(self, restaurant_id: str, fields: dict) -> dict | None:
+        for r in self.restaurants:
+            if r["id"] == restaurant_id:
+                r.update(fields)
+                return r
+        return None
+
+    def delete_restaurant(self, restaurant_id: str) -> bool:
+        before = len(self.restaurants)
+        self.restaurants = [r for r in self.restaurants if r["id"] != restaurant_id]
+        return len(self.restaurants) < before
+
+    # ── Catalog helpers ───────────────────────────────────────────────────────
+
+    def get_categories(self) -> list[dict]:
+        return self.categories
+
+    def get_category(self, category_id: str) -> dict | None:
+        return next((c for c in self.categories if c["id"] == category_id), None)
+
+    def add_category(self, c: dict) -> dict:
+        self.categories.append(c)
+        return c
+
+    def update_category(self, category_id: str, fields: dict) -> dict | None:
+        for c in self.categories:
+            if c["id"] == category_id:
+                c.update(fields)
+                return c
+        return None
+
+    def delete_category(self, category_id: str) -> bool:
+        before = len(self.categories)
+        self.categories = [c for c in self.categories if c["id"] != category_id]
+        return len(self.categories) < before
+
+    # ── Menu item helpers ─────────────────────────────────────────────────────
+
+    def get_menu_items(
+        self,
+        restaurant_id: str | None = None,
+        category_id: str | None = None,
+        is_available: bool | None = None,
+        is_featured: bool | None = None,
+    ) -> list[dict]:
+        results = self.menu_items
+        if restaurant_id:
+            results = [i for i in results if i["restaurant_id"] == restaurant_id]
+        if category_id:
+            results = [i for i in results if i["category_id"] == category_id]
+        if is_available is not None:
+            results = [i for i in results if i["is_available"] == is_available]
+        if is_featured is not None:
+            results = [i for i in results if i["is_featured"] == is_featured]
+        return results
+
+    def get_menu_item(self, item_id: str) -> dict | None:
+        return next((i for i in self.menu_items if i["id"] == item_id), None)
+
+    def add_menu_item(self, item: dict) -> dict:
+        self.menu_items.append(item)
+        return item
+
+    def update_menu_item(self, item_id: str, fields: dict) -> dict | None:
+        for i in self.menu_items:
+            if i["id"] == item_id:
+                i.update(fields)
+                return i
+        return None
+
+    def delete_menu_item(self, item_id: str) -> bool:
+        before = len(self.menu_items)
+        self.menu_items = [i for i in self.menu_items if i["id"] != item_id]
+        return len(self.menu_items) < before
+
+    # ── Order helpers ─────────────────────────────────────────────────────────
+
+    def get_orders(self, user_id: str | None = None, status: str | None = None) -> list[dict]:
+        results = self.orders
+        if user_id:
+            results = [o for o in results if o["user_id"] == user_id]
+        if status:
+            results = [o for o in results if o["status"] == status]
+        return results
+
+    def get_order(self, order_id: str, user_id: str | None = None) -> dict | None:
+        return next(
+            (o for o in self.orders if o["id"] == order_id and (user_id is None or o["user_id"] == user_id)),
+            None,
+        )
+
+    def add_order(self, o: dict) -> dict:
+        self.orders.append(o)
+        return o
+
+    def update_order(self, order_id: str, fields: dict) -> dict | None:
+        for o in self.orders:
+            if o["id"] == order_id:
+                o.update(fields)
+                return o
+        return None
+
+    def cancel_order(self, order_id: str, user_id: str) -> dict | None:
+        o = self.get_order(order_id, user_id)
+        if o and o["status"] not in ("delivered", "cancelled"):
+            o["status"] = "cancelled"
+            return o
+        return None
+
 
 # Module-level singleton — shared across all resolvers
 store = MockStore()
+
