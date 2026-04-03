@@ -1,1 +1,1 @@
-# mock_server/resolvers/__init__.py
+# Resolvers package

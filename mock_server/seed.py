@@ -1,6 +1,8 @@
 """
 Seed data — sourced from DDT example payloads.
-Two users: Jane (ke) and John (za).
+Consumer users: Jane (ke) and John (za).
+Operator RBAC users: use mock-token-admin, mock-token-analyst, mock-token-operator,
+mock-token-wrong-store (see TOKEN_MAP).
 """
 from __future__ import annotations
 
@@ -8,6 +10,10 @@ from __future__ import annotations
 TOKEN_MAP: dict[str, str] = {
     "mock-token-jane": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "mock-token-john": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    "mock-token-admin": "user-123",
+    "mock-token-analyst": "user-analytics-1",
+    "mock-token-operator": "user-orders-1",
+    "mock-token-wrong-store": "user-wrong-store-1",
 }
 DEFAULT_USER_ID = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"  # Jane is default
 
@@ -41,6 +47,105 @@ SEED_USERS: list[dict] = [
         "market_id": "za",
         "date_joined": "2025-03-01T08:00:00Z",
         "created_at": "2025-03-01T08:00:00Z",
+    },
+]
+
+# ─── Operator users (minimal account rows; RBAC in SEED_OPERATOR_USER_PROFILES) ─
+SEED_OPERATOR_USERS: list[dict] = [
+    {
+        "id": "user-123",
+        "email": "admin@rossa.mock",
+        "first_name": "Admin",
+        "last_name": "User",
+        "phone_number": "",
+        "is_active": True,
+        "email_verified": True,
+        "phone_verified": True,
+        "market_id": "ke",
+        "date_joined": "2026-01-01T08:00:00Z",
+        "created_at": "2026-01-01T08:00:00Z",
+    },
+    {
+        "id": "user-analytics-1",
+        "email": "analyst@rossa.mock",
+        "first_name": "Analytics",
+        "last_name": "Only",
+        "phone_number": "",
+        "is_active": True,
+        "email_verified": True,
+        "phone_verified": True,
+        "market_id": "ke",
+        "date_joined": "2026-01-02T08:00:00Z",
+        "created_at": "2026-01-02T08:00:00Z",
+    },
+    {
+        "id": "user-orders-1",
+        "email": "operator@rossa.mock",
+        "first_name": "Orders",
+        "last_name": "Viewer",
+        "phone_number": "",
+        "is_active": True,
+        "email_verified": True,
+        "phone_verified": True,
+        "market_id": "ke",
+        "date_joined": "2026-01-03T08:00:00Z",
+        "created_at": "2026-01-03T08:00:00Z",
+    },
+    {
+        "id": "user-wrong-store-1",
+        "email": "wrongstore@rossa.mock",
+        "first_name": "Wrong",
+        "last_name": "Store",
+        "phone_number": "",
+        "is_active": True,
+        "email_verified": True,
+        "phone_verified": True,
+        "market_id": "ke",
+        "date_joined": "2026-01-04T08:00:00Z",
+        "created_at": "2026-01-04T08:00:00Z",
+    },
+]
+
+# ─── Operator user profiles (RBAC: role, permissions, allowed stores) ────────
+SEED_OPERATOR_USER_PROFILES: list[dict] = [
+    {
+        "id": "user-123",
+        "role": "admin",
+        "permissions": [
+            "orders:view",
+            "orders:update",
+            "orders:delete",
+            "orders:export",
+            "menu:view",
+            "menu:manage",
+            "staff:view",
+            "staff:manage",
+            "analytics:view",
+            "analytics:export",
+            "stores:access_all",
+            "stores:manage",
+            "settings:view",
+            "settings:manage",
+        ],
+        "allowed_stores": ["store-a", "store-b"],
+    },
+    {
+        "id": "user-analytics-1",
+        "role": "analyst",
+        "permissions": ["analytics:view"],
+        "allowed_stores": ["store-a"],
+    },
+    {
+        "id": "user-orders-1",
+        "role": "operator",
+        "permissions": ["orders:view"],
+        "allowed_stores": ["store-a"],
+    },
+    {
+        "id": "user-wrong-store-1",
+        "role": "admin",
+        "permissions": ["orders:view", "analytics:view", "menu:view"],
+        "allowed_stores": ["store-z"],
     },
 ]
 
@@ -192,7 +297,9 @@ SEED_RESTAURANTS: list[dict] = [
     {
         "id": "rest-001",
         "name": "KFC Westlands",
+        "code": "NAI-WL-01",
         "address": "Westlands Square, Waiyaki Way",
+        "location": {"lat": -1.2673, "lng": 36.8123},
         "city": "Nairobi",
         "postal_code": "00100",
         "country": "KE",
@@ -201,6 +308,9 @@ SEED_RESTAURANTS: list[dict] = [
         "phone": "+254711000001",
         "email": "westlands@kfc.co.ke",
         "is_open": True,
+        "is_active": True,
+        "capabilities": ["pickup", "delivery"],
+        "version": 3,
         "rating": 4.6,
         "review_count": 312,
         "distance_km": 1.2,
@@ -217,7 +327,9 @@ SEED_RESTAURANTS: list[dict] = [
     {
         "id": "rest-002",
         "name": "KFC CBD Towers",
+        "code": "NAI-CBD-02",
         "address": "Anniversary Towers, University Way",
+        "location": {"lat": -1.2864, "lng": 36.8226},
         "city": "Nairobi",
         "postal_code": "00200",
         "country": "KE",
@@ -226,6 +338,9 @@ SEED_RESTAURANTS: list[dict] = [
         "phone": "+254711000002",
         "email": "cbd@kfc.co.ke",
         "is_open": True,
+        "is_active": True,
+        "capabilities": ["pickup", "dine-in"],
+        "version": 2,
         "rating": 4.2,
         "review_count": 189,
         "distance_km": 3.7,
@@ -242,7 +357,9 @@ SEED_RESTAURANTS: list[dict] = [
     {
         "id": "rest-003",
         "name": "KFC Sandton City",
+        "code": "JHB-SC-01",
         "address": "Sandton City Mall, Rivonia Rd",
+        "location": {"lat": -26.1071, "lng": 28.0567},
         "city": "Johannesburg",
         "postal_code": "2196",
         "country": "ZA",
@@ -251,6 +368,9 @@ SEED_RESTAURANTS: list[dict] = [
         "phone": "+27110000003",
         "email": "sandton@kfc.co.za",
         "is_open": False,
+        "is_active": True,
+        "capabilities": ["pickup", "delivery"],
+        "version": 1,
         "rating": 4.8,
         "review_count": 527,
         "distance_km": 8.4,
@@ -1561,5 +1681,82 @@ SEED_ORDERS: list[dict] = [
         "estimated_delivery_minutes": 15,
         "placed_at": "2026-03-28T11:00:00Z",
         "updated_at": "2026-03-28T11:08:00Z",
+    },
+]
+
+# ─── Modifier Groups (GraphQL Catalog) ────────────────────────────────────────
+SEED_MODIFIER_GROUPS: list[dict] = [
+    {
+        "id": "mg-001",
+        "item_id": "item-001",
+        "name": "Spice Level",
+        "min_selections": 1,
+        "max_selections": 1,
+        "is_required": True,
+        "modifiers": [
+            {"id": "mod-001", "name": "Mild",      "price_adjustment": "0.00",  "is_active": True},
+            {"id": "mod-002", "name": "Regular",   "price_adjustment": "0.00",  "is_active": True},
+            {"id": "mod-003", "name": "Extra Hot", "price_adjustment": "0.00",  "is_active": True},
+        ],
+    },
+    {
+        "id": "mg-002",
+        "item_id": "item-001",
+        "name": "Sauce Choice",
+        "min_selections": 0,
+        "max_selections": 2,
+        "is_required": False,
+        "modifiers": [
+            {"id": "mod-004", "name": "Zinger Sauce", "price_adjustment": "0.00",  "is_active": True},
+            {"id": "mod-005", "name": "BBQ Sauce",    "price_adjustment": "0.00",  "is_active": True},
+            {"id": "mod-006", "name": "Garlic Mayo",  "price_adjustment": "20.00", "is_active": True},
+        ],
+    },
+    {
+        "id": "mg-003",
+        "item_id": "item-011",
+        "name": "Size",
+        "min_selections": 1,
+        "max_selections": 1,
+        "is_required": True,
+        "modifiers": [
+            {"id": "mod-007", "name": "Regular", "price_adjustment": "-30.00", "is_active": True},
+            {"id": "mod-008", "name": "Large",   "price_adjustment": "0.00",   "is_active": True},
+            {"id": "mod-009", "name": "XL",      "price_adjustment": "30.00",  "is_active": True},
+        ],
+    },
+]
+
+# ─── Store Overrides (GraphQL Catalog) ────────────────────────────────────────
+SEED_STORE_OVERRIDES: list[dict] = [
+    {
+        "id": "so-001",
+        "store_id": "rest-001",
+        "menu_item_id": "item-002",
+        "override_type": "price_override",
+        "override_price": "599.00",
+        "reason": "Promotional price at Westlands for Q2 campaign.",
+        "effective_from": "2026-04-01T00:00:00Z",
+        "effective_until": "2026-06-30T23:59:59Z",
+    },
+    {
+        "id": "so-002",
+        "store_id": "rest-003",
+        "menu_item_id": "item-015",
+        "override_type": "hidden",
+        "override_price": None,
+        "reason": "Item not stocked at this franchise location.",
+        "effective_from": None,
+        "effective_until": None,
+    },
+    {
+        "id": "so-003",
+        "store_id": "rest-002",
+        "menu_item_id": "item-009",
+        "override_type": "unavailable",
+        "override_price": None,
+        "reason": "Temporarily out of stock.",
+        "effective_from": "2026-04-03T00:00:00Z",
+        "effective_until": "2026-04-10T23:59:59Z",
     },
 ]

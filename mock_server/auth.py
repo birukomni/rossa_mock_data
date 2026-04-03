@@ -1,8 +1,9 @@
 """
 Mock auth helpers.
-- Any Bearer token resolves to Jane (default).
-- `mock-token-john` resolves to John.
-- No token → raises Unauthorized.
+- Unknown Bearer token → Jane (default user id).
+- `mock-token-john` → John; `mock-token-admin` / `mock-token-analyst` /
+  `mock-token-operator` / `mock-token-wrong-store` → operator RBAC mock users.
+- No token → raises Unauthorized (REST) / Exception (GraphQL).
 """
 from __future__ import annotations
 

@@ -8,6 +8,8 @@ import copy
 import uuid
 from mock_server.seed import (
     SEED_USERS,
+    SEED_OPERATOR_USERS,
+    SEED_OPERATOR_USER_PROFILES,
     SEED_PROFILES,
     SEED_ADDRESSES,
     SEED_MARKETS,
@@ -17,6 +19,8 @@ from mock_server.seed import (
     SEED_CATALOG_CATEGORIES,
     SEED_MENU_ITEMS,
     SEED_ORDERS,
+    SEED_MODIFIER_GROUPS,
+    SEED_STORE_OVERRIDES,
 )
 
 
@@ -25,7 +29,8 @@ class MockStore:
         self.reset()
 
     def reset(self) -> None:
-        self.users: list[dict] = copy.deepcopy(SEED_USERS)
+        self.users: list[dict] = copy.deepcopy(SEED_USERS + SEED_OPERATOR_USERS)
+        self.operator_user_profiles: list[dict] = copy.deepcopy(SEED_OPERATOR_USER_PROFILES)
         self.profiles: list[dict] = copy.deepcopy(SEED_PROFILES)
         self.addresses: list[dict] = copy.deepcopy(SEED_ADDRESSES)
         self.markets: list[dict] = copy.deepcopy(SEED_MARKETS)
@@ -36,6 +41,8 @@ class MockStore:
         self.categories: list[dict] = copy.deepcopy(SEED_CATALOG_CATEGORIES)
         self.menu_items: list[dict] = copy.deepcopy(SEED_MENU_ITEMS)
         self.orders: list[dict] = copy.deepcopy(SEED_ORDERS)
+        self.modifier_groups: list[dict] = copy.deepcopy(SEED_MODIFIER_GROUPS)
+        self.store_overrides: list[dict] = copy.deepcopy(SEED_STORE_OVERRIDES)
 
     # ── User helpers ─────────────────────────────────────────────────────────
     def get_user(self, user_id: str) -> dict | None:
@@ -48,6 +55,9 @@ class MockStore:
     def delete_user(self, user_id: str) -> None:
         self.deleted_users.add(user_id)
         self.users = [u for u in self.users if u["id"] != user_id]
+
+    def get_operator_user_profile(self, user_id: str) -> dict | None:
+        return next((p for p in self.operator_user_profiles if p["id"] == user_id), None)
 
     # ── Profile helpers ───────────────────────────────────────────────────────
     def get_profile(self, account_id: str) -> dict | None:
@@ -294,7 +304,39 @@ class MockStore:
             return o
         return None
 
+    # ── Modifier Group helpers ──────────────────────────────────────────────────
+
+    def get_modifier_groups(self, item_id: str) -> list[dict]:
+        return [mg for mg in self.modifier_groups if mg["item_id"] == item_id]
+
+    def get_modifier_group(self, group_id: str) -> dict | None:
+        return next((mg for mg in self.modifier_groups if mg["id"] == group_id), None)
+
+    def add_modifier_group(self, group: dict) -> dict:
+        self.modifier_groups.append(group)
+        return group
+
+    # ── Store Override helpers ──────────────────────────────────────────────────
+
+    def get_store_overrides(
+        self,
+        store_id: str | None = None,
+        menu_item_id: str | None = None,
+    ) -> list[dict]:
+        results = self.store_overrides
+        if store_id:
+            results = [o for o in results if o["store_id"] == store_id]
+        if menu_item_id:
+            results = [o for o in results if o["menu_item_id"] == menu_item_id]
+        return results
+
+    def get_store_override(self, override_id: str) -> dict | None:
+        return next((o for o in self.store_overrides if o["id"] == override_id), None)
+
+    def add_store_override(self, override: dict) -> dict:
+        self.store_overrides.append(override)
+        return override
+
 
 # Module-level singleton — shared across all resolvers
 store = MockStore()
-
