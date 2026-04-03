@@ -6,6 +6,7 @@ dist/
 wheels/
 *.egg-info
 
+rossa-experience
 # Virtual environments
 .venv
 .env.example

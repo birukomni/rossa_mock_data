@@ -1,7 +1,7 @@
 # Rossa API Guide — Part 2: REST Endpoints
-> **Version:** v1 &nbsp;|&nbsp; **Updated:** 2026-04-01  
+> **Version:** v1 &nbsp;|&nbsp; **Updated:** 2026-04-02  
 > Complete reference for **React**, **Next.js**, and **Flutter** developers.  
-> Covers **Restaurants**, **Categories (Catalog)**, **Menu Items (Meals)**, and **Orders**.
+> Covers **Restaurants**, **Categories (Catalog)**, **Menu Items (Meals)**, **Orders**, and **Operator user profile (RBAC mock)**.
 
 ---
 
@@ -56,9 +56,96 @@ Authorization: Bearer <token>
 |---|---|---|
 | `mock-token-jane` | Jane Doe (Kenya) | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
 | `mock-token-john` | John Smith (South Africa) | `b2c3d4e5-f6a7-8901-bcde-f12345678901` |
+| `mock-token-admin` | Operator — admin (full RBAC mock) | `user-123` |
+| `mock-token-analyst` | Operator — analytics-only | `user-analytics-1` |
+| `mock-token-operator` | Operator — orders view, one store | `user-orders-1` |
+| `mock-token-wrong-store` | Operator — admin scope, wrong store allow-list | `user-wrong-store-1` |
 | _any other token_ | Defaults to Jane Doe | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
 
 > ⚠️ **No token at all** → `401 Unauthorized`.
+
+### Operator user profile (RBAC mock)
+
+Use this to test permission and store-scoping UI against fixed personas.
+
+| | |
+|---|---|
+| **Method & path** | `GET /api/v1/me/operator-profile` |
+| **Auth** | `Authorization: Bearer <token>` (operator tokens above) |
+| **Consumer tokens** | Jane / John → **404** `No operator user profile for this account` |
+
+**GraphQL (same data):** query `myOperatorUserProfile(input: {})` with the same `Authorization` header. `payload` is `null` for consumer-only users.
+
+**cURL — admin profile**
+
+```bash
+curl -s -H "Authorization: Bearer mock-token-admin" \
+  "http://localhost:4000/api/v1/me/operator-profile"
+```
+
+**Admin (full permissions)**
+
+```json
+{
+  "id": "user-123",
+  "role": "admin",
+  "permissions": [
+    "orders:view",
+    "orders:update",
+    "orders:delete",
+    "orders:export",
+
+    "menu:view",
+    "menu:manage",
+
+    "staff:view",
+    "staff:manage",
+
+    "analytics:view",
+    "analytics:export",
+
+    "stores:access_all",
+    "stores:manage",
+
+    "settings:view",
+    "settings:manage"
+  ],
+  "allowedStores": ["store-a", "store-b"]
+}
+```
+
+**Analytics-only user**
+
+```json
+{
+  "id": "user-analytics-1",
+  "role": "analyst",
+  "permissions": ["analytics:view"],
+  "allowedStores": ["store-a"]
+}
+```
+
+**Orders view-only for one store**
+
+```json
+{
+  "id": "user-orders-1",
+  "role": "operator",
+  "permissions": ["orders:view"],
+  "allowedStores": ["store-a"]
+}
+```
+
+**Wrong store access**
+
+```json
+{
+  "id": "user-wrong-store-1",
+  "role": "admin",
+  "permissions": ["orders:view", "analytics:view", "menu:view"],
+  "allowedStores": ["store-z"]
+}
+```
 
 ### Unauthorized Error (No / Bad Token)
 ```json
